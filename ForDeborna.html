@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>For Deborna ❤️</title>
+
+<style>
+
+body{
+margin:0;
+font-family:system-ui;
+background:#020424;
+color:white;
+overflow:hidden;
+display:flex;
+}
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-2;
+}
+
+#hearts{
+z-index:-1;
+}
+
+.app{
+display:flex;
+width:100%;
+height:100vh;
+}
+
+.sidebar{
+width:240px;
+background:linear-gradient(180deg,#021d1c,#01111c);
+padding:25px;
+box-shadow:5px 0 20px rgba(0,0,0,.5);
+}
+
+.logo{
+margin-bottom:30px;
+}
+
+.song{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px;
+border-radius:8px;
+margin-bottom:10px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.song:hover{
+background:#ffffff15;
+transform:translateX(6px);
+}
+
+.song.active{
+background:#ff4d6d22;
+box-shadow:0 0 15px #ff4d6d55;
+}
+
+.bars{
+display:flex;
+gap:3px;
+opacity:0;
+}
+
+.song.active .bars{
+opacity:1;
+}
+
+.bars div{
+width:3px;
+height:12px;
+background:#ff4d6d;
+animation:bars .6s infinite alternate;
+}
+
+.bars div:nth-child(2){
+animation-delay:.2s;
+}
+
+.bars div:nth-child(3){
+animation-delay:.4s;
+}
+
+@keyframes bars{
+from{height:6px}
+to{height:18px}
+}
+
+.player{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+}
+
+.vinyl{
+width:240px;
+height:240px;
+border-radius:50%;
+background-image:url("DebornaImage.jpeg");
+background-size:cover;
+background-position:center;
+box-shadow:0 0 60px #ff4d6d;
+animation:spin 5s linear infinite;
+animation-play-state:paused;
+}
+
+@keyframes spin{
+from{transform:rotate(0)}
+to{transform:rotate(360deg)}
+}
+
+.controls{
+margin-top:20px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:20px;
+background:#ff4d6d;
+color:white;
+font-size:14px;
+cursor:pointer;
+}
+
+.progress{
+width:340px;
+max-width:90%;
+height:6px;
+background:#333;
+margin-top:20px;
+border-radius:10px;
+overflow:hidden;
+cursor:pointer;
+}
+
+#bar{
+height:100%;
+width:0%;
+background:#ff4d6d;
+}
+
+.time{
+margin-top:8px;
+font-size:14px;
+opacity:0.8;
+}
+
+.lyrics{
+margin-top:25px;
+max-width:420px;
+opacity:0.9;
+font-style:italic;
+}
+
+.visualizer{
+display:flex;
+gap:3px;
+margin-top:25px;
+height:40px;
+}
+
+.visualizer div{
+width:4px;
+background:#ff4d6d;
+animation:viz .5s infinite alternate;
+}
+
+@keyframes viz{
+from{height:6px}
+to{height:40px}
+}
+
+@media(max-width:768px){
+
+.sidebar{
+display:none;
+}
+
+.vinyl{
+width:200px;
+height:200px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body id="body">
+
+<canvas id="stars"></canvas> <canvas id="hearts"></canvas>
+
+<div class="app">
+
+<div class="sidebar">
+
+<h2 class="logo">For Deborna ❤️</h2>
+
+<div class="song active" onclick="playSong(0)">
+<span>Tumhi Dekho Na</span>
+<div class="bars"><div></div><div></div><div></div></div>
+</div>
+
+<div class="song" onclick="playSong(1)">
+<span>Jadu Hai Nasha Hai</span>
+<div class="bars"><div></div><div></div><div></div></div>
+</div>
+
+<div class="song" onclick="playSong(2)">
+<span>Mere Dholna Sun</span>
+<div class="bars"><div></div><div></div><div></div></div>
+</div>
+
+<div class="song" onclick="playSong(3)">
+<span>Zara Sa</span>
+<div class="bars"><div></div><div></div><div></div></div>
+</div>
+
+<div class="song" onclick="playSong(4)">
+<span>Aaro Ekbar Cholo Fire Jai</span>
+<div class="bars"><div></div><div></div><div></div></div>
+</div>
+
+</div>
+
+<div class="player">
+
+<h1 id="title">Tumhi Dekho Na</h1>
+
+<div class="vinyl" id="vinyl"></div>
+
+<div class="controls">
+<button onclick="prevSong()">Prev</button>
+<button onclick="togglePlay()">Play / Pause</button>
+<button onclick="nextSong()">Next</button>
+</div>
+
+<div class="progress" onclick="seek(event)">
+<div id="bar"></div>
+</div>
+
+<div class="time" id="time">0:00 / 0:00</div>
+
+<div class="lyrics" id="lyrics"></div>
+
+<div class="visualizer" id="visualizer"></div>
+
+<audio id="audio"></audio>
+
+</div>
+
+</div>
+
+<script>
+
+let songs=[
+
+{title:"Tumhi Dekho Na",file:"Tum_Hi_Dekho_Na.mp3",lyrics:"Tumhi dekho na yeh kya ho gaya..."},
+
+{title:"Jadu Hai Nasha Hai",file:"Jaadu_Hein_Naasha_Hein.mp3",lyrics:"Jaadu hai nasha hai madhoshiyan..."},
+
+{title:"Mere Dholna Sun",file:"Mere_Dholna_Sun.mp3",lyrics:"Mere dholna sun..."},
+
+{title:"Zara Sa",file:"Zara_Sa.mp3",lyrics:"Zara sa dil mein de jagah tu..."},
+
+{title:"Aaro Ekbar",file:"Aaro_Ekbar.mp3",lyrics:"Aaro ekbar cholo fire jai..."}
+
+]
+
+let audio=document.getElementById("audio")
+let vinyl=document.getElementById("vinyl")
+let title=document.getElementById("title")
+let lyrics=document.getElementById("lyrics")
+let body=document.getElementById("body")
+
+let current=0
+
+audio.src=songs[0].file
+lyrics.innerText=songs[0].lyrics
+
+let items=document.querySelectorAll(".song")
+
+function updateSidebar(){
+
+items.forEach(el=>el.classList.remove("active"))
+items[current].classList.add("active")
+
+}
+
+function playSong(i){
+
+current=i
+
+audio.src=songs[i].file
+audio.play()
+
+title.innerText=songs[i].title
+lyrics.innerText=songs[i].lyrics
+
+vinyl.style.animationPlayState="running"
+
+updateSidebar()
+
+}
+
+function togglePlay(){
+
+if(audio.paused){
+
+audio.play()
+vinyl.style.animationPlayState="running"
+
+}else{
+
+audio.pause()
+vinyl.style.animationPlayState="paused"
+
+}
+
+}
+
+function nextSong(){
+
+current++
+if(current>=songs.length)current=0
+playSong(current)
+
+}
+
+function prevSong(){
+
+current--
+if(current<0)current=songs.length-1
+playSong(current)
+
+}
+
+audio.ontimeupdate=function(){
+
+let percent=(audio.currentTime/audio.duration)*100
+document.getElementById("bar").style.width=percent+"%"
+
+let cur=format(audio.currentTime)
+let dur=format(audio.duration)
+
+document.getElementById("time").innerText=cur+" / "+dur
+
+}
+
+function format(t){
+
+if(!t)return"0:00"
+
+let m=Math.floor(t/60)
+let s=Math.floor(t%60)
+
+if(s<10)s="0"+s
+
+return m+":"+s
+
+}
+
+function seek(e){
+
+let rect=e.currentTarget.getBoundingClientRect()
+let pos=(e.clientX-rect.left)/rect.width
+
+audio.currentTime=pos*audio.duration
+
+}
+
+audio.onended=function(){
+
+nextSong()
+
+}
+
+const canvas=document.getElementById("stars")
+const ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+let stars=[]
+
+for(let i=0;i<200;i++){
+
+stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2})
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="white"
+
+stars.forEach(s=>{
+
+ctx.beginPath()
+ctx.arc(s.x,s.y,s.r,0,Math.PI*2)
+ctx.fill()
+
+s.y+=0.2
+if(s.y>canvas.height)s.y=0
+
+})
+
+requestAnimationFrame(draw)
+
+}
+
+draw()
+
+const heartCanvas=document.getElementById("hearts")
+const hctx=heartCanvas.getContext("2d")
+
+heartCanvas.width=window.innerWidth
+heartCanvas.height=window.innerHeight
+
+let hearts=[]
+
+function spawnHeart(){
+
+hearts.push({
+x:Math.random()*heartCanvas.width,
+y:heartCanvas.height,
+size:10+Math.random()*10,
+speed:1+Math.random()*2
+})
+
+}
+
+setInterval(spawnHeart,500)
+
+function drawHearts(){
+
+hctx.clearRect(0,0,heartCanvas.width,heartCanvas.height)
+
+hearts.forEach(h=>{
+
+hctx.fillStyle="#ff4d6d"
+
+hctx.beginPath()
+hctx.arc(h.x,h.y,h.size,0,Math.PI*2)
+hctx.fill()
+
+h.y-=h.speed
+
+})
+
+requestAnimationFrame(drawHearts)
+
+}
+
+drawHearts()
+
+let viz=document.getElementById("visualizer")
+
+for(let i=0;i<40;i++){
+
+let bar=document.createElement("div")
+bar.style.animationDelay=Math.random()+"s"
+viz.appendChild(bar)
+
+}
+
+</script>
+
+</body>
+</html>
