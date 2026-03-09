@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# For Deborna Music Player 
-A romantic responsive music player with animated galaxy background, floating hearts, visualizer and synced subtitles. 
-=======
 # Web Music Player
 
 A responsive web-based music player built using HTML, CSS, and JavaScript. The application provides an interactive audio playback interface with animated visuals, a dynamic playlist, and a fully client-side architecture designed to run directly in modern web browsers.
@@ -114,4 +110,3 @@ git clone https://github.com/USERNAME/music-player.git
 ## License
 
 This project is released under the MIT License.
->>>>>>> 941cc899bea0ff9a54e7cd8832f0496f986d3377
